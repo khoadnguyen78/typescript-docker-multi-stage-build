@@ -4,10 +4,10 @@ on: [push, pull_request]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v5
         with:
           version: 14
       - run: npm ci
@@ -16,7 +16,7 @@ jobs:
 
   build-docker:
     needs: [build-and-test]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - run: docker build .
