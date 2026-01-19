@@ -177,43 +177,48 @@ jobs:
           region=${{ secrets.OCI_REGION }}
           EOF
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Prepare Bastion SSH keys
+        run: |
+          echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.oci/bastion.key
+          echo "${{ secrets.BASTION_SSH_PUBLIC_KEY }}" > ~/.oci/bastion.key.pub
+          chmod 600 ~/.oci/bastion.key
+
       - name: Create Bastion port-forwarding session
         id: bastion
         run: |
           SESSION_JSON=$(oci bastion session create-port-forwarding \
             --bastion-id "${{ secrets.BASTION_OCID }}" \
             --display-name bastion-session-2 \
-            --ssh-public-key "${{ secrets.BASTION_SSH_PUBLIC_KEY }}" \
+            --ssh-public-key-file ~/.oci/bastion.key.pub \
             --target-private-ip "${{ secrets.OKE_API_PRIVATE_IP }}" \
             --target-port 6443 \
             --session-ttl 10800)
 
           echo "$SESSION_JSON"
 
-          SESSION_ID=$(echo "$SESSION_JSON" | jq -r '.data.id')
           SSH_USER=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".username')
           BASTION_HOST=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".hostname')
 
-          echo "SESSION_ID=$SESSION_ID" >> $GITHUB_ENV
           echo "SSH_USER=$SSH_USER" >> $GITHUB_ENV
           echo "BASTION_HOST=$BASTION_HOST" >> $GITHUB_ENV
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
-          chmod 600 ~/.ssh/bastion.key
+      # - name: Setup SSH key
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
+      #     chmod 600 ~/.ssh/bastion.key
 
       - name: Trust Bastion host
         run: |
+          mkdir -p ~/.ssh
           ssh-keyscan -H "$BASTION_HOST" >> ~/.ssh/known_hosts
       
       - name: Open SSH tunnel via Bastion
         run: |
-          ssh -i ~/.ssh/bastion.key \
-            -N -L 6443:${{ secrets.OKE_API_PRIVATE_IP }}:6443 \
-            ${SSH_USER}@${BASTION_HOST} &
-          sleep 10
+          ssh -i ~/.ssh/bastion.key -N -L 6443:${{ secrets.OKE_API_PRIVATE_IP }}:6443 -p 22 ${SSH_USER}@${BASTION_HOST} && sleep 10
 
       # -----------------------------
       # Get kubeconfig from OKE
