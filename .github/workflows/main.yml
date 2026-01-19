@@ -205,16 +205,15 @@ jobs:
       #     echo "SSH_USER=$SSH_USER" >> $GITHUB_ENV
       #     echo "BASTION_HOST=$BASTION_HOST" >> $GITHUB_ENV
 
-      # - name: Setup SSH key
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
-      #     chmod 600 ~/.ssh/bastion.key
+      - name: Prepare SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
+          chmod 600 ~/.ssh/bastion.key
 
-      # - name: Trust Bastion host
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     ssh-keyscan -H "$BASTION_HOST" >> ~/.ssh/known_hosts
+      - name: Trust Bastion host
+        run: |
+          ssh-keyscan -H "$BASTION_HOST" >> ~/.ssh/known_hosts
       
       - name: Open SSH tunnel via Bastion
         run: |
