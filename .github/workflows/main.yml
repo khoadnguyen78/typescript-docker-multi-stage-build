@@ -211,6 +211,7 @@ jobs:
       
       - name: Open SSH tunnel via Bastion
         run: |
+          cat ~/.oci/bastion.key
           ssh -i ~/.oci/bastion.key -N -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipia4gkhmmhze5j5rmw5z323tlhojgfuhsbg55epv2b7ad2q@host.bastion.ap-singapore-1.oci.oraclecloud.com
 
       # -----------------------------
