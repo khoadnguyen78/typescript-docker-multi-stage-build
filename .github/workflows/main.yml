@@ -186,38 +186,32 @@ jobs:
           echo "${{ secrets.BASTION_SSH_PUBLIC_KEY }}" > ~/.oci/bastion.key.pub
           chmod 600 ~/.oci/bastion.key
 
-      - name: Create Bastion port-forwarding session
-        id: bastion
-        run: |
-          SESSION_JSON=$(oci bastion session create-port-forwarding \
-            --bastion-id "${{ secrets.BASTION_OCID }}" \
-            --display-name bastion-session-2 \
-            --ssh-public-key-file ~/.oci/bastion.key.pub \
-            --target-private-ip "${{ secrets.OKE_API_PRIVATE_IP }}" \
-            --target-port 6443 \
-            --session-ttl 10800)
+      # - name: Create Bastion port-forwarding session
+      #   id: bastion
+      #   run: |
+      #     SESSION_JSON=$(oci bastion session create-port-forwarding \
+      #       --bastion-id "${{ secrets.BASTION_OCID }}" \
+      #       --display-name bastion-session-2 \
+      #       --ssh-public-key-file ~/.oci/bastion.key.pub \
+      #       --target-private-ip "${{ secrets.OKE_API_PRIVATE_IP }}" \
+      #       --target-port 6443 \
+      #       --session-ttl 10800)
 
-          echo "$SESSION_JSON"
+      #     echo "$SESSION_JSON"
 
-          SSH_USER=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".username')
-          BASTION_HOST=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".hostname')
+      # - name: Prepare SSH keys
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
+      #     chmod 600 ~/.ssh/bastion.key
 
-          echo "SSH_USER=$SSH_USER" >> $GITHUB_ENV
-          echo "BASTION_HOST=$BASTION_HOST" >> $GITHUB_ENV
-
-      - name: Prepare SSH keys
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
-          chmod 600 ~/.ssh/bastion.key
-
-      - name: Trust Bastion host
-        run: |
-          ssh-keyscan -H "$BASTION_HOST" >> ~/.ssh/known_hosts
+      # - name: Trust Bastion host
+      #   run: |
+      #     ssh-keyscan -H "$BASTION_HOST" >> ~/.ssh/known_hosts
       
       - name: Open SSH tunnel via Bastion
         run: |
-          ssh -i ~/.ssh/bastion.key -N -L 6443:${{ secrets.OKE_API_PRIVATE_IP }}:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipiaq26shpe63g2zfdrh2eo35tyb7hbb37f6dd4vwkoqrvqa@host.bastion.ap-singapore-1.oci.oraclecloud.com && sleep 10
+          ssh -i ~/.oci/bastion.key -N -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipia4gkhmmhze5j5rmw5z323tlhojgfuhsbg55epv2b7ad2q@host.bastion.ap-singapore-1.oci.oraclecloud.com
 
       # -----------------------------
       # Get kubeconfig from OKE
