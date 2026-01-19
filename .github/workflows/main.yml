@@ -232,7 +232,7 @@ jobs:
       - name: Patch kubeconfig to localhost
         run: |
           sed -i 's#https://.*:6443#https://127.0.0.1:6443#g' $HOME/.kube/config
-          echo "$HOME/.kube/config"
+          cat "$HOME/.kube/config"
 
       # -----------------------------
       # Verify cluster access
