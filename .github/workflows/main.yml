@@ -211,7 +211,7 @@ jobs:
       
       - name: Open SSH tunnel via Bastion
         run: |
-          ssh -i ~/.ssh/bastion.key -f -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -L 127.0.0.1:6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipia4gkhmmhze5j5rmw5z323tlhojgfuhsbg55epv2b7ad2q@host.bastion.ap-singapore-1.oci.oraclecloud.com &
+          ssh -i ~/.ssh/bastion.key -f -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -L 127.0.0.1:6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipia4gkhmmhze5j5rmw5z323tlhojgfuhsbg55epv2b7ad2q@host.bastion.ap-singapore-1.oci.oraclecloud.com
           echo "SSH tunnel started"
           sleep 10
       
