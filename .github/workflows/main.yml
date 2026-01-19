@@ -151,10 +151,13 @@ jobs:
       # -----------------------------
       # Setup OCI CLI
       # -----------------------------
-      - name: Setup OCI CLI
-        uses: oracle-actions/setup-oci-cli@v1
-        with:
-          version: latest
+      - name: Install OCI CLI
+        run: |
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh | bash -s -- -b $HOME/bin
+          echo "$HOME/bin" >> $GITHUB_PATH
+          
+      - name: Verify OCI CLI
+        run: oci --version
 
       - name: Configure OCI CLI
         run: |
