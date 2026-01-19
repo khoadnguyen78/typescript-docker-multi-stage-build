@@ -211,9 +211,24 @@ jobs:
       
       - name: Open SSH tunnel via Bastion
         run: |
-          ssh -i ~/.ssh/bastion.key -f -N -L 6443:127.0.0.1:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipia4gkhmmhze5j5rmw5z323tlhojgfuhsbg55epv2b7ad2q@host.bastion.ap-singapore-1.oci.oraclecloud.com &
+          ssh -i ~/.ssh/bastion.key -f -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -L 127.0.0.1:6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipia4gkhmmhze5j5rmw5z323tlhojgfuhsbg55epv2b7ad2q@host.bastion.ap-singapore-1.oci.oraclecloud.com &
           echo "SSH tunnel started"
           sleep 10
+      
+      - name: Verify SSH tunnel is listening
+        run: |
+          for i in {1..10}; do
+            if ss -lnt | grep -q ':6443'; then
+              echo "Tunnel is listening on 6443"
+              exit 0
+            fi
+            echo "Waiting for tunnel..."
+            sleep 2
+          done
+
+          echo "❌ SSH tunnel did not open"
+          ss -lnt
+          exit 1
 
       # -----------------------------
       # Get kubeconfig from OKE
@@ -232,6 +247,10 @@ jobs:
       - name: Patch kubeconfig to localhost
         run: |
           sed -i 's#https://.*:6443#https://127.0.0.1:6443#g' $HOME/.kube/config
+
+      - name: Test API TCP connectivity
+        run: |
+          nc -vz 127.0.0.1 6443
 
       # -----------------------------
       # Verify cluster access
