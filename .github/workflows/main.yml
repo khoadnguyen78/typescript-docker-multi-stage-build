@@ -191,9 +191,9 @@ jobs:
             --region "${{ secrets.OCI_REGION }}" \
             --token-version 2.0.0
 
-      - name: Start SSH tunnel via Bastion
-        run: |
-          ssh -i ~/.oci/ssh_key.pem -N -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipiaq26shpe63g2zfdrh2eo35tyb7hbb37f6dd4vwkoqrvqa@host.bastion.ap-singapore-1.oci.oraclecloud.com
+      # - name: Start SSH tunnel via Bastion
+      #   run: |
+      #     ssh -i ~/.oci/ssh_key.pem -N -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipiaq26shpe63g2zfdrh2eo35tyb7hbb37f6dd4vwkoqrvqa@host.bastion.ap-singapore-1.oci.oraclecloud.com
 
       # -----------------------------
       # Verify cluster access
