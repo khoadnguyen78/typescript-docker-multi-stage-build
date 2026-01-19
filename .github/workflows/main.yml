@@ -180,12 +180,15 @@ jobs:
       # -----------------------------
       # Get kubeconfig from OKE
       # -----------------------------
-      - name: Get kubeconfig
+      - name: Prepare kube directory
+        run: mkdir -p $HOME/.kube
+
+      - name: Get kubeconfig from OKE
         run: |
           oci ce cluster create-kubeconfig \
-            --cluster-id ${{ secrets.OKE_CLUSTER_OCID }} \
-            --file /home/khoand78/.kube/config \
-            --region ${{ secrets.OCI_REGION }} \
+            --cluster-id "${{ secrets.OKE_CLUSTER_OCID }}" \
+            --file "$HOME/.kube/config" \
+            --region "${{ secrets.OCI_REGION }}" \
             --token-version 2.0.0
 
       - name: Start SSH tunnel via Bastion
