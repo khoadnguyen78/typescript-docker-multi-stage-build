@@ -186,24 +186,24 @@ jobs:
           echo "${{ secrets.BASTION_SSH_PUBLIC_KEY }}" > ~/.oci/bastion.key.pub
           chmod 600 ~/.oci/bastion.key
 
-      # - name: Create Bastion port-forwarding session
-      #   id: bastion
-      #   run: |
-      #     SESSION_JSON=$(oci bastion session create-port-forwarding \
-      #       --bastion-id "${{ secrets.BASTION_OCID }}" \
-      #       --display-name bastion-session-2 \
-      #       --ssh-public-key-file ~/.oci/bastion.key.pub \
-      #       --target-private-ip "${{ secrets.OKE_API_PRIVATE_IP }}" \
-      #       --target-port 6443 \
-      #       --session-ttl 10800)
+      - name: Create Bastion port-forwarding session
+        id: bastion
+        run: |
+          SESSION_JSON=$(oci bastion session create-port-forwarding \
+            --bastion-id "${{ secrets.BASTION_OCID }}" \
+            --display-name bastion-session-2 \
+            --ssh-public-key-file ~/.oci/bastion.key.pub \
+            --target-private-ip "${{ secrets.OKE_API_PRIVATE_IP }}" \
+            --target-port 6443 \
+            --session-ttl 10800)
 
-      #     echo "$SESSION_JSON"
+          echo "$SESSION_JSON"
 
-      #     SSH_USER=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".username')
-      #     BASTION_HOST=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".hostname')
+          SSH_USER=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".username')
+          BASTION_HOST=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".hostname')
 
-      #     echo "SSH_USER=$SSH_USER" >> $GITHUB_ENV
-      #     echo "BASTION_HOST=$BASTION_HOST" >> $GITHUB_ENV
+          echo "SSH_USER=$SSH_USER" >> $GITHUB_ENV
+          echo "BASTION_HOST=$BASTION_HOST" >> $GITHUB_ENV
 
       - name: Prepare SSH keys
         run: |
