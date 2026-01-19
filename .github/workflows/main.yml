@@ -177,29 +177,62 @@ jobs:
           region=${{ secrets.OCI_REGION }}
           EOF
 
+      - name: Create Bastion port-forwarding session
+        id: bastion
+        run: |
+          SESSION_JSON=$(oci bastion session create-port-forwarding \
+            --bastion-id "${{ secrets.BASTION_OCID }}" \
+            --display-name bastion-session-2 \
+            --ssh-public-key "${{ secrets.BASTION_SSH_PUBLIC_KEY }}" \
+            --target-private-ip "${{ secrets.OKE_API_PRIVATE_IP }}" \
+            --target-port 6443 \
+            --session-ttl 10800)
+
+          echo "$SESSION_JSON"
+
+          SESSION_ID=$(echo "$SESSION_JSON" | jq -r '.data.id')
+          SSH_USER=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".username')
+          BASTION_HOST=$(echo "$SESSION_JSON" | jq -r '.data."ssh-metadata".hostname')
+
+          echo "SESSION_ID=$SESSION_ID" >> $GITHUB_ENV
+          echo "SSH_USER=$SSH_USER" >> $GITHUB_ENV
+          echo "BASTION_HOST=$BASTION_HOST" >> $GITHUB_ENV
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
+          chmod 600 ~/.ssh/bastion.key
+
+      - name: Trust Bastion host
+        run: |
+          ssh-keyscan -H "$BASTION_HOST" >> ~/.ssh/known_hosts
+      
+      - name: Open SSH tunnel via Bastion
+        run: |
+          ssh -i ~/.ssh/bastion.key \
+            -N -L 6443:${{ secrets.OKE_API_PRIVATE_IP }}:6443 \
+            ${SSH_USER}@${BASTION_HOST} &
+          sleep 10
+
       # -----------------------------
       # Get kubeconfig from OKE
       # -----------------------------
       - name: Prepare kube directory
         run: mkdir -p $HOME/.kube
 
-      - name: Get kubeconfig from OKE
+      - name: Get kubeconfig (private)
         run: |
           oci ce cluster create-kubeconfig \
             --cluster-id "${{ secrets.OKE_CLUSTER_OCID }}" \
             --file "$HOME/.kube/config" \
             --region "${{ secrets.OCI_REGION }}" \
-            --token-version 2.0.0
+            --token-version 2.0.0 \
+            --endpoint PRIVATE_ENDPOINT
 
-      - name: Setup SSH key
+      - name: Patch kubeconfig to localhost
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/ssh_key.key
-          chmod 600 ~/.ssh/ssh_key.key
-
-      - name: Open SSH tunnel via OCI Bastion
-        run: |
-          ssh -i ~/.ssh/ssh_key.key -N -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipiaq26shpe63g2zfdrh2eo35tyb7hbb37f6dd4vwkoqrvqa@host.bastion.ap-singapore-1.oci.oraclecloud.com && sleep 10
+          sed -i 's#https://.*:6443#https://127.0.0.1:6443#g' $HOME/.kube/config
 
       # -----------------------------
       # Verify cluster access
