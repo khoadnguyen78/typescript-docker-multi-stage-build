@@ -199,11 +199,7 @@ jobs:
 
       - name: Open SSH tunnel via OCI Bastion
         run: |
-          ssh -i ~/.ssh/ssh_key.key \
-            -N -L 6443:10.0.0.2:6443 \
-            -p 22 \
-            ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipiaq26shpe63g2zfdrh2eo35tyb7hbb37f6dd4vwkoqrvqa@host.bastion.ap-singapore-1.oci.oraclecloud.com &
-          sleep 10
+          ssh -i ~/.ssh/ssh_key.key -N -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipiaq26shpe63g2zfdrh2eo35tyb7hbb37f6dd4vwkoqrvqa@host.bastion.ap-singapore-1.oci.oraclecloud.com && sleep 10
 
       # -----------------------------
       # Verify cluster access
