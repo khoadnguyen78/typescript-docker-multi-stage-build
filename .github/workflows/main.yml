@@ -128,3 +128,81 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
+
+  # --------------------------------
+  # 5. Deploy to OKE
+  # --------------------------------
+  Deploy-to-OKE-dev:
+    needs: [Trivy-image-scan]
+    runs-on: ubuntu-latest
+
+    environment: dev   # enables manual approval if configured
+
+    permissions:
+      contents: read
+
+    steps:
+      # -----------------------------
+      # Checkout Helm chart
+      # -----------------------------
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # -----------------------------
+      # Setup OCI CLI
+      # -----------------------------
+      - name: Setup OCI CLI
+        uses: oracle-actions/setup-oci-cli@v1
+        with:
+          version: latest
+
+      - name: Configure OCI CLI
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_api_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.oci/ssh_key.pem
+          chmod 600 ~/.oci/ssh_key.pem
+
+          cat > ~/.oci/config <<EOF
+          [DEFAULT]
+          user=${{ secrets.OCI_USER_OCID }}
+          fingerprint=${{ secrets.OCI_FINGERPRINT }}
+          key_file=~/.oci/oci_api_key.pem
+          tenancy=${{ secrets.OCI_TENANCY_OCID }}
+          region=${{ secrets.OCI_REGION }}
+          EOF
+
+      # -----------------------------
+      # Get kubeconfig from OKE
+      # -----------------------------
+      - name: Get kubeconfig
+        run: |
+          oci ce cluster create-kubeconfig \
+            --cluster-id ${{ secrets.OKE_CLUSTER_OCID }} \
+            --file /home/khoand78/.kube/config \
+            --region ${{ secrets.OCI_REGION }} \
+            --token-version 2.0.0
+
+      - name: Start SSH tunnel via Bastion
+        run: |
+          ssh -i ~/.oci/ssh_key.pem -N -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipiaq26shpe63g2zfdrh2eo35tyb7hbb37f6dd4vwkoqrvqa@host.bastion.ap-singapore-1.oci.oraclecloud.com
+
+      # -----------------------------
+      # Verify cluster access
+      # -----------------------------
+      - name: Verify cluster
+        run: |
+          kubectl get nodes
+          kubectl get ns
+
+      # -----------------------------
+      # Deploy using Helm
+      # -----------------------------
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install my-platform ./helm \
+            --namespace app \
+            --create-namespace \
+            --set apps.app1.image.repository=ghcr.io/${{ github.repository }} \
+            --set apps.app1.image.tag=${{ github.sha }}
