@@ -264,7 +264,7 @@ jobs:
       # -----------------------------
       - name: Deploy with Helm
         run: |
-          helm upgrade --install my-platform ./helm \
+          helm upgrade --install my-platform ./typescript-app/ \
             --namespace app \
             --create-namespace \
             --set apps.app1.image.repository=ghcr.io/${{ github.repository }} \
