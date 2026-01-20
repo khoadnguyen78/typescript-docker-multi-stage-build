@@ -129,143 +129,143 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
 
-  # --------------------------------
-  # 5. Deploy to OKE
-  # --------------------------------
-  Deploy-to-OKE-dev:
-    needs: [Trivy-image-scan]
-    runs-on: ubuntu-latest
+  # # --------------------------------
+  # # 5. Deploy to OKE
+  # # --------------------------------
+  # Deploy-to-OKE-dev:
+  #   needs: [Trivy-image-scan]
+  #   runs-on: ubuntu-latest
 
-    environment: dev   # enables manual approval if configured
+  #   environment: dev   # enables manual approval if configured
 
-    permissions:
-      contents: read
+  #   permissions:
+  #     contents: read
 
-    steps:
-      # -----------------------------
-      # Checkout Helm chart
-      # -----------------------------
-      - name: Checkout
-        uses: actions/checkout@v5
+  #   steps:
+  #     # -----------------------------
+  #     # Checkout Helm chart
+  #     # -----------------------------
+  #     - name: Checkout
+  #       uses: actions/checkout@v5
 
-      # -----------------------------
-      # Setup OCI CLI
-      # -----------------------------
-      - name: Install OCI CLI
-        run: |
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
-          bash install.sh --accept-all-defaults
-          echo "$HOME/bin" >> $GITHUB_PATH
+  #     # -----------------------------
+  #     # Setup OCI CLI
+  #     # -----------------------------
+  #     - name: Install OCI CLI
+  #       run: |
+  #         curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
+  #         bash install.sh --accept-all-defaults
+  #         echo "$HOME/bin" >> $GITHUB_PATH
           
-      - name: Verify OCI CLI
-        run: oci --version
+  #     - name: Verify OCI CLI
+  #       run: oci --version
 
-      - name: Configure OCI CLI
-        run: |
-          mkdir -p ~/.oci
-          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_key.pem
-          chmod 600 ~/.oci/oci_api_key.pem
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.oci/ssh_key.pem
-          chmod 600 ~/.oci/ssh_key.pem
+  #     - name: Configure OCI CLI
+  #       run: |
+  #         mkdir -p ~/.oci
+  #         echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_key.pem
+  #         chmod 600 ~/.oci/oci_api_key.pem
+  #         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.oci/ssh_key.pem
+  #         chmod 600 ~/.oci/ssh_key.pem
 
-          cat > ~/.oci/config <<EOF
-          [DEFAULT]
-          user=${{ secrets.OCI_USER_OCID }}
-          fingerprint=${{ secrets.OCI_FINGERPRINT }}
-          key_file=~/.oci/oci_api_key.pem
-          tenancy=${{ secrets.OCI_TENANCY_OCID }}
-          region=${{ secrets.OCI_REGION }}
-          EOF
+  #         cat > ~/.oci/config <<EOF
+  #         [DEFAULT]
+  #         user=${{ secrets.OCI_USER_OCID }}
+  #         fingerprint=${{ secrets.OCI_FINGERPRINT }}
+  #         key_file=~/.oci/oci_api_key.pem
+  #         tenancy=${{ secrets.OCI_TENANCY_OCID }}
+  #         region=${{ secrets.OCI_REGION }}
+  #         EOF
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
+  #     - name: Install jq
+  #       run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Prepare Bastion SSH keys
-        run: |
-          echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.oci/bastion.key
-          echo "${{ secrets.BASTION_SSH_PUBLIC_KEY }}" > ~/.oci/bastion.key.pub
-          chmod 600 ~/.oci/bastion.key
+  #     - name: Prepare Bastion SSH keys
+  #       run: |
+  #         echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.oci/bastion.key
+  #         echo "${{ secrets.BASTION_SSH_PUBLIC_KEY }}" > ~/.oci/bastion.key.pub
+  #         chmod 600 ~/.oci/bastion.key
 
-      # - name: Create Bastion port-forwarding session
-      #   id: bastion
-      #   run: |
-      #     SESSION_JSON=$(oci bastion session create-port-forwarding \
-      #       --bastion-id "${{ secrets.BASTION_OCID }}" \
-      #       --display-name bastion-session-2 \
-      #       --ssh-public-key-file ~/.oci/bastion.key.pub \
-      #       --target-private-ip "${{ secrets.OKE_API_PRIVATE_IP }}" \
-      #       --target-port 6443 \
-      #       --session-ttl 10800)
+  #     # - name: Create Bastion port-forwarding session
+  #     #   id: bastion
+  #     #   run: |
+  #     #     SESSION_JSON=$(oci bastion session create-port-forwarding \
+  #     #       --bastion-id "${{ secrets.BASTION_OCID }}" \
+  #     #       --display-name bastion-session-2 \
+  #     #       --ssh-public-key-file ~/.oci/bastion.key.pub \
+  #     #       --target-private-ip "${{ secrets.OKE_API_PRIVATE_IP }}" \
+  #     #       --target-port 6443 \
+  #     #       --session-ttl 10800)
 
-      #     echo "$SESSION_JSON"
+  #     #     echo "$SESSION_JSON"
 
-      - name: Prepare SSH keys
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
-          chmod 600 ~/.ssh/bastion.key
+  #     - name: Prepare SSH keys
+  #       run: |
+  #         mkdir -p ~/.ssh
+  #         echo "${{ secrets.BASTION_SSH_PRIVATE_KEY }}" > ~/.ssh/bastion.key
+  #         chmod 600 ~/.ssh/bastion.key
 
-      - name: Trust Bastion host
-        run: |
-          ssh-keyscan -H "host.bastion.ap-singapore-1.oci.oraclecloud.com" >> ~/.ssh/known_hosts
+  #     - name: Trust Bastion host
+  #       run: |
+  #         ssh-keyscan -H "host.bastion.ap-singapore-1.oci.oraclecloud.com" >> ~/.ssh/known_hosts
       
-      - name: Open SSH tunnel via Bastion
-        run: |
-          ssh -i ~/.ssh/bastion.key -f -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipia4gkhmmhze5j5rmw5z323tlhojgfuhsbg55epv2b7ad2q@host.bastion.ap-singapore-1.oci.oraclecloud.com
-          echo "SSH tunnel started"
-          sleep 10
+  #     - name: Open SSH tunnel via Bastion
+  #       run: |
+  #         ssh -i ~/.ssh/bastion.key -f -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -L 6443:10.0.0.2:6443 -p 22 ocid1.bastionsession.oc1.ap-singapore-1.amaaaaaas66yipia4gkhmmhze5j5rmw5z323tlhojgfuhsbg55epv2b7ad2q@host.bastion.ap-singapore-1.oci.oraclecloud.com
+  #         echo "SSH tunnel started"
+  #         sleep 10
       
-      - name: Verify SSH tunnel is listening
-        run: |
-          for i in {1..10}; do
-            if ss -lnt | grep -q ':6443'; then
-              echo "Tunnel is listening on 6443"
-              exit 0
-            fi
-            echo "Waiting for tunnel..."
-            sleep 2
-          done
+  #     - name: Verify SSH tunnel is listening
+  #       run: |
+  #         for i in {1..10}; do
+  #           if ss -lnt | grep -q ':6443'; then
+  #             echo "Tunnel is listening on 6443"
+  #             exit 0
+  #           fi
+  #           echo "Waiting for tunnel..."
+  #           sleep 2
+  #         done
 
-          echo "❌ SSH tunnel did not open"
-          ss -lnt
-          exit 1
+  #         echo "❌ SSH tunnel did not open"
+  #         ss -lnt
+  #         exit 1
 
-      # -----------------------------
-      # Get kubeconfig from OKE
-      # -----------------------------
-      - name: Prepare kube directory
-        run: mkdir -p $HOME/.kube
+  #     # -----------------------------
+  #     # Get kubeconfig from OKE
+  #     # -----------------------------
+  #     - name: Prepare kube directory
+  #       run: mkdir -p $HOME/.kube
 
-      - name: Get kubeconfig (private)
-        run: |
-          oci ce cluster create-kubeconfig \
-            --cluster-id "${{ secrets.OKE_CLUSTER_OCID }}" \
-            --file "$HOME/.kube/config" \
-            --region "${{ secrets.OCI_REGION }}" \
-            --token-version 2.0.0
+  #     - name: Get kubeconfig (private)
+  #       run: |
+  #         oci ce cluster create-kubeconfig \
+  #           --cluster-id "${{ secrets.OKE_CLUSTER_OCID }}" \
+  #           --file "$HOME/.kube/config" \
+  #           --region "${{ secrets.OCI_REGION }}" \
+  #           --token-version 2.0.0
 
-      - name: Patch kubeconfig to localhost
-        run: |
-          sed -i 's#https://.*:6443#https://127.0.0.1:6443#g' $HOME/.kube/config
+  #     - name: Patch kubeconfig to localhost
+  #       run: |
+  #         sed -i 's#https://.*:6443#https://127.0.0.1:6443#g' $HOME/.kube/config
 
-      - name: Test API TCP connectivity
-        run: |
-          nc -vz 127.0.0.1 6443
+  #     - name: Test API TCP connectivity
+  #       run: |
+  #         nc -vz 127.0.0.1 6443
 
-      # -----------------------------
-      # Verify cluster access
-      # -----------------------------
-      - name: Verify cluster
-        run: |
-          kubectl get nodes
+  #     # -----------------------------
+  #     # Verify cluster access
+  #     # -----------------------------
+  #     - name: Verify cluster
+  #       run: |
+  #         kubectl get nodes
 
-      # -----------------------------
-      # Deploy using Helm
-      # -----------------------------
-      - name: Deploy with Helm
-        run: |
-          helm upgrade --install my-platform ./typescript-app/ \
-            --namespace app \
-            --create-namespace \
-            --set apps.app1.image.repository=ghcr.io/${{ github.repository }} \
-            --set apps.app1.image.tag=${{ github.sha }}
+  #     # -----------------------------
+  #     # Deploy using Helm
+  #     # -----------------------------
+  #     - name: Deploy with Helm
+  #       run: |
+  #         helm upgrade --install my-platform ./typescript-app/ \
+  #           --namespace app \
+  #           --create-namespace \
+  #           --set apps.app1.image.repository=ghcr.io/${{ github.repository }} \
+  #           --set apps.app1.image.tag=${{ github.sha }}
