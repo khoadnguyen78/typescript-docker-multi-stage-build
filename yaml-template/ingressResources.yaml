@@ -1,0 +1,44 @@
+apiVersion: "ingress.oraclecloud.com/v1beta1"
+kind: IngressClassParameters
+metadata:
+  name: native-ic-params
+  namespace: native-ingress-controller-system
+spec:
+  compartmentId: "ocid1.compartment.oc1..aaaaaaaalv7b42cizlaqgpo3o4aml3j4766en75zo3txysvlwsimyql2kora"
+  subnetId: "ocid1.subnet.oc1.ap-singapore-1.aaaaaaaaiihdwdieuk4sacyfcuwdw4eqqw3wk7xyovqzhxjxq27syw3fb53a"
+  loadBalancerName: "native-ic-lb"
+  isPrivate: false
+  maxBandwidthMbps: 400
+  minBandwidthMbps: 100
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: native-ic-ingress-class
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: oci.oraclecloud.com/native-ingress-controller
+  parameters:
+    scope: Namespace
+    namespace: native-ingress-controller-system
+    apiGroup: ingress.oraclecloud.com
+    kind: ingressclassparameters
+    name: native-ic-params
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: native-ic-ingress
+spec:
+  ingressClassName: native-ic-ingress-class
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-app-my-app
+                port:
+                  number: 3000

@@ -1,0 +1,93 @@
+{
+  "data": {
+    "available-kubernetes-upgrades": [
+      "v1.34.0",
+      "v1.34.1"
+    ],
+    "cluster-pod-network-options": [
+      {
+        "cni-type": "FLANNEL_OVERLAY"
+      }
+    ],
+    "compartment-id": "ocid1.compartment.oc1..aaaaaaaalv7b42cizlaqgpo3o4aml3j4766en75zo3txysvlwsimyql2kora",
+    "defined-tags": {
+      "Oracle-Tags": {
+        "CreatedBy": "default/caonguyenle007@gmail.com",
+        "CreatedOn": "2026-01-16T10:59:29.121Z"
+      }
+    },
+    "endpoint-config": {
+      "is-public-ip-enabled": false,
+      "nsg-ids": [
+        "ocid1.networksecuritygroup.oc1.ap-singapore-1.aaaaaaaaqbydm5fbrtezlnqyb4x24nu7ycgt7cyyhoi32xzvjci2cami6q6a"
+      ],
+      "subnet-id": "ocid1.subnet.oc1.ap-singapore-1.aaaaaaaa5vx2lv5ssjcnh7nll5m7ew3366ksm5txpcvannxrdu2o5rfpslkq"
+    },
+    "endpoints": {
+      "ipv6-endpoint": null,
+      "kubernetes": null,
+      "private-endpoint": "10.0.0.2:6443",
+      "public-endpoint": null,
+      "vcn-hostname-endpoint": "cbzs7otwoha.subnetkubernete.acmedevvcn.oraclevcn.com:6443"
+    },
+    "freeform-tags": {},
+    "id": "ocid1.cluster.oc1.ap-singapore-1.aaaaaaaalxvjytpvyt6dqiyuqmnul7qgv27dutg4agw7ihc67cbzs7otwoha",
+    "image-policy-config": {
+      "is-policy-enabled": false,
+      "key-details": []
+    },
+    "kms-key-id": null,
+    "kubernetes-version": "v1.33.1",
+    "lifecycle-details": null,
+    "lifecycle-state": "ACTIVE",
+    "metadata": {
+      "created-by-user-id": "ocid1.user.oc1..aaaaaaaah5yeximgaxdtkc6u4p2lynracdfoafnaacg27enpuamlu4gc6mha",
+      "created-by-work-request-id": "ocid1.clustersworkrequest.oc1.ap-singapore-1.aaaaaaaap55przxcjdn2oc4zkey5q74rosmrpsdov6qigjmidwa6wtrrnnxa",
+      "deleted-by-user-id": null,
+      "deleted-by-work-request-id": null,
+      "time-created": "2026-01-16T10:59:29+00:00",
+      "time-credential-expiration": "2031-01-16T10:59:57+00:00",
+      "time-deleted": null,
+      "time-updated": "2026-01-18T04:33:10+00:00",
+      "updated-by-user-id": "ocid1.user.oc1..aaaaaaaah5yeximgaxdtkc6u4p2lynracdfoafnaacg27enpuamlu4gc6mha",
+      "updated-by-work-request-id": "ocid1.clustersworkrequest.oc1.ap-singapore-1.amaaaaaas66yipiaj2bpvyfvnkkafcl3y7s2hzznxars7wx6zegkc3cn5nca"
+    },
+    "name": "cluster1",
+    "open-id-connect-discovery-endpoint": null,
+    "open-id-connect-discovery-key": "af9afc98-cbd7-45d2-afb0-d75bf8a25f08",
+    "options": {
+      "add-ons": {
+        "is-kubernetes-dashboard-enabled": false,
+        "is-tiller-enabled": false
+      },
+      "admission-controller-options": {
+        "is-pod-security-policy-enabled": false
+      },
+      "ip-families": [
+        "IPv4"
+      ],
+      "kubernetes-network-config": {
+        "pods-cidr": "10.244.0.0/16",
+        "services-cidr": "10.96.0.0/16"
+      },
+      "open-id-connect-discovery": null,
+      "open-id-connect-token-authentication-config": null,
+      "persistent-volume-config": {
+        "defined-tags": null,
+        "freeform-tags": null
+      },
+      "service-lb-config": {
+        "backend-nsg-ids": null,
+        "defined-tags": null,
+        "freeform-tags": null
+      },
+      "service-lb-subnet-ids": [
+        "ocid1.subnet.oc1.ap-singapore-1.aaaaaaaaiihdwdieuk4sacyfcuwdw4eqqw3wk7xyovqzhxjxq27syw3fb53a"
+      ]
+    },
+    "system-tags": {},
+    "type": "ENHANCED_CLUSTER",
+    "vcn-id": "ocid1.vcn.oc1.ap-singapore-1.amaaaaaas66yipiavm4yslqomsqwjjsrvga24qkky3lnfi75k7ege4mydurq"
+  },
+  "etag": "0e698cc7b619b0b35e494b4051d9ca6b11972b37b6e002d331da5a18cc389c6f--gzip"
+}

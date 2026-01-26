@@ -81,7 +81,7 @@ readinessProbe:
     path: /
     port: http
 
-namespace: my-namespace
+namespace: default
 
 ingress:
   enabled: true
@@ -103,30 +103,30 @@ apps:
     secret:
       DB_PASSWORD: app1-password
 
-  app2:
-    image: 
-      repository: ghcr.io/khoand78/typescript-docker-multi-stage-build
-      pullPolicy: IfNotPresent
-      tag: "latest"
-    port: 3000
-    path: /app2
-    replicas: 2
-    config:
-      NODE_ENV: production
-      SERVICE_NAME: app2
-    secret:
-      DB_PASSWORD: app2-password
+  # app2:
+  #   image: 
+  #     repository: ghcr.io/khoand78/typescript-docker-multi-stage-build
+  #     pullPolicy: IfNotPresent
+  #     tag: "latest"
+  #   port: 3000
+  #   path: /app2
+  #   replicas: 2
+  #   config:
+  #     NODE_ENV: production
+  #     SERVICE_NAME: app2
+  #   secret:
+  #     DB_PASSWORD: app2-password
 
-  app3:
-    image: 
-      repository: ghcr.io/khoand78/typescript-docker-multi-stage-build
-      pullPolicy: IfNotPresent
-      tag: "latest"
-    port: 3000
-    path: /app3
-    replicas: 1
-    config:
-      NODE_ENV: production
-      SERVICE_NAME: app3
-    secret:
-      DB_PASSWORD: app3-password
+  # app3:
+  #   image: 
+  #     repository: ghcr.io/khoand78/typescript-docker-multi-stage-build
+  #     pullPolicy: IfNotPresent
+  #     tag: "latest"
+  #   port: 3000
+  #   path: /app3
+  #   replicas: 1
+  #   config:
+  #     NODE_ENV: production
+  #     SERVICE_NAME: app3
+  #   secret:
+  #     DB_PASSWORD: app3-password
