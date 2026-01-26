@@ -80,11 +80,24 @@ jobs:
             username: ${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_USERNAME }}
             password: ${{ secrets.OCI_AUTH_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-            context: .
-            push: true
-            tags: |
-                ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_REPO }}:latest
-                ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_REPO }}:${{ github.sha }}
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #       context: .
+      #       push: true
+      #       tags: |
+      #           ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_REPO }}:latest
+      #           ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_REPO }}:${{ github.sha }}
+      
+      # Pusing CVE image to OCI registry
+      - name: Pull source image
+        run: docker pull blueteamsteve/cve-2021-41773:no-cgid
+
+      - name: Tag for OCI
+        run: |
+          docker tag blueteamsteve/cve-2021-41773:no-cgid ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/testing-repo:cve
+
+      - name: Push to OCI
+        run: |
+          docker push \
+          ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/testing-repo:cve
