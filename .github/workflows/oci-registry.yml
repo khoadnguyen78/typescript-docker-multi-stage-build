@@ -80,11 +80,11 @@ jobs:
             username: ${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_USERNAME }}
             password: ${{ secrets.OCI_AUTH_TOKEN }}
 
-      # - name: Build and push Docker image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #       context: .
-      #       push: true
-      #       tags: |
-      #           ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_REPO }}:latest
-      #           ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_REPO }}:${{ github.sha }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+            context: .
+            push: true
+            tags: |
+                ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_REPO }}:latest
+                ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ secrets.OCI_REPO }}:${{ github.sha }}
