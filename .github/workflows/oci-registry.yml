@@ -106,7 +106,7 @@ jobs:
 
       - name: Tag image for GitHub
         run: |
-          docker tag blueteamsteve/cve-2021-41773:no-cgid ghcr.io/${{ github.repository }}/sample-repo:cve
+          docker tag blueteamsteve/cve-2021-41773:no-cgid ghcr.io/${{ github.repository }}:cve
 
       - name: Push to OCI
         run: |
@@ -114,7 +114,7 @@ jobs:
 
       - name: Push to GitHub
         run: |
-          docker push ghcr.io/${{ github.repository }}/sample-repo:cve
+          docker push ghcr.io/${{ github.repository }}:cve
 
   # --------------------------------
   # 4. Image Scan (Container Scan)
