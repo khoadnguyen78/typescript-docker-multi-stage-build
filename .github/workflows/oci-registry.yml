@@ -96,15 +96,15 @@ jobs:
       
       # Pusing CVE image to OCI registry
       - name: Pull source image
-        run: docker pull blueteamsteve/cve-2021-41773:no-cgid
+        run: docker pull vulnerables/metasploitable2
 
       - name: Tag image for OCI
         run: |
-          docker tag blueteamsteve/cve-2021-41773:no-cgid ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:cve-latest
+          docker tag vulnerables/metasploitable2 ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:vulnerables
 
       - name: Push to OCI
         run: |
-          docker push ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:cve-latest
+          docker push ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:vulnerables
 
       # Pushing CVE image to GH 
       - name: Login to GitHub Registry
@@ -115,15 +115,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull source image
-        run: docker pull blueteamsteve/cve-2021-41773:no-cgid
+        run: docker pull vulnerables/metasploitable2
 
       - name: Tag image for GitHub
         run: |
-          docker tag blueteamsteve/cve-2021-41773:no-cgid ghcr.io/${{ github.repository }}:cve-latest
+          docker tag vulnerables/metasploitable2 ghcr.io/${{ github.repository }}:vulnerables
 
       - name: Push to GitHub
         run: |
-          docker push ghcr.io/${{ github.repository }}:cve-latest
+          docker push ghcr.io/${{ github.repository }}:vulnerables
 
   # --------------------------------
   # 4. Image Scan (Container Scan)
@@ -148,7 +148,7 @@ jobs:
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: ghcr.io/${{ github.repository }}:cve-latest
+          image-ref: ghcr.io/${{ github.repository }}:vulnerables
           format: sarif
           output: sample-output.sarif
           severity: CRITICAL,HIGH
