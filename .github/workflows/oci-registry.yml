@@ -150,10 +150,10 @@ jobs:
         with:
           image-ref: ghcr.io/${{ github.repository }}:cve-latest
           format: sarif
-          output: sample-results.sarif
+          output: sample-output.sarif
           severity: CRITICAL,HIGH
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: sample-results.sarif
+          sarif_file: sample-output.sarif
