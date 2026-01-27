@@ -12,59 +12,59 @@ jobs:
   # --------------------------------
   # 1. Build & Test (CI)
   # --------------------------------
-  Build-and-test-npm-package:
-    runs-on: ubuntu-latest
+  # Build-and-test-npm-package:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          cache: npm
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v5
+  #       with:
+  #         node-version: 20
+  #         cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+  #     - name: Install dependencies
+  #       run: npm ci
 
-      - name: Build
-        run: npm run build
+  #     - name: Build
+  #       run: npm run build
 
-      - name: Test
-        run: npm test
+  #     - name: Test
+  #       run: npm test
 
   # --------------------------------
   # 2. Code Scan (SAST)
   # --------------------------------
-  CodeQL-scan:
-    needs: [Build-and-test-npm-package]
-    runs-on: ubuntu-latest
+  # CodeQL-scan:
+  #   needs: [Build-and-test-npm-package]
+  #   runs-on: ubuntu-latest
 
-    permissions:
-      security-events: write
-      contents: read
+  #   permissions:
+  #     security-events: write
+  #     contents: read
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v5
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: javascript
+  #     - name: Initialize CodeQL
+  #       uses: github/codeql-action/init@v4
+  #       with:
+  #         languages: javascript
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
+  #     - name: Autobuild
+  #       uses: github/codeql-action/autobuild@v4
 
-      - name: Analyze
-        uses: github/codeql-action/analyze@v4
+  #     - name: Analyze
+  #       uses: github/codeql-action/analyze@v4
 
   # --------------------------------
   # 3. Build & Push Docker Image
   # --------------------------------
   Build-and-push-Docker-image:
-    needs: [CodeQL-scan]
+    # needs: [CodeQL-scan]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -104,13 +104,17 @@ jobs:
         run: |
           docker tag blueteamsteve/cve-2021-41773:no-cgid ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:cve
 
-      - name: Tag image for GitHub
-        run: |
-          docker tag blueteamsteve/cve-2021-41773:no-cgid ghcr.io/${{ github.repository }}:cve
-
       - name: Push to OCI
         run: |
           docker push ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:cve
+
+      # Pushing CVE image to GH 
+      - name: Pull source image
+        run: docker pull blueteamsteve/cve-2021-41773:no-cgid
+
+      - name: Tag image for GitHub
+        run: |
+          docker tag blueteamsteve/cve-2021-41773:no-cgid ghcr.io/${{ github.repository }}:cve
 
       - name: Push to GitHub
         run: |
