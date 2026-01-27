@@ -66,6 +66,11 @@ jobs:
   Build-and-push-Docker-image:
     # needs: [CodeQL-scan]
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
