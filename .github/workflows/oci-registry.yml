@@ -100,11 +100,11 @@ jobs:
 
       - name: Tag image for OCI
         run: |
-          docker tag blueteamsteve/cve-2021-41773:no-cgid ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:cve
+          docker tag blueteamsteve/cve-2021-41773:no-cgid ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:cve-latest
 
       - name: Push to OCI
         run: |
-          docker push ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:cve
+          docker push ${{ secrets.OCI_REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/sample-repo:cve-latest
 
       # Pushing CVE image to GH 
       - name: Login to GitHub Registry
@@ -113,17 +113,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Pull source image
         run: docker pull blueteamsteve/cve-2021-41773:no-cgid
 
       - name: Tag image for GitHub
         run: |
-          docker tag blueteamsteve/cve-2021-41773:no-cgid ghcr.io/${{ github.repository }}:cve
+          docker tag blueteamsteve/cve-2021-41773:no-cgid ghcr.io/${{ github.repository }}:cve-latest
 
       - name: Push to GitHub
         run: |
-          docker push ghcr.io/${{ github.repository }}:cve
+          docker push ghcr.io/${{ github.repository }}:cve-latest
 
   # --------------------------------
   # 4. Image Scan (Container Scan)
@@ -148,7 +148,7 @@ jobs:
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: ghcr.io/${{ github.repository }}:cve
+          image-ref: ghcr.io/${{ github.repository }}:cve-latest
           format: sarif
           output: sample-results.sarif
           severity: CRITICAL,HIGH
